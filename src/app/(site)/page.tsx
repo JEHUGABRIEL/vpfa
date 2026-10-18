@@ -402,16 +402,34 @@ export default async function HomePage() {
         </div>
         <div className="p-marquee">
           <div className="p-track">
-            {partners.map((partner) => (
-              <span className="p-chip" key={partner.id}>
-                {partner.name}
-              </span>
-            ))}
-            {partners.map((partner) => (
-              <span className="p-chip" aria-hidden="true" key={`dup-${partner.id}`}>
-                {partner.name}
-              </span>
-            ))}
+            {[false, true].map((duplicate) =>
+              partners.map((partner) =>
+                partner.logo ? (
+                  <span
+                    className="p-chip p-chip-logo"
+                    key={`${duplicate ? "dup-" : ""}${partner.id}`}
+                    aria-hidden={duplicate || undefined}
+                    title={partner.name}
+                  >
+                    <Image
+                      src={partner.logo}
+                      alt={duplicate ? "" : partner.name}
+                      width={180}
+                      height={90}
+                      sizes="180px"
+                    />
+                  </span>
+                ) : (
+                  <span
+                    className="p-chip"
+                    key={`${duplicate ? "dup-" : ""}${partner.id}`}
+                    aria-hidden={duplicate || undefined}
+                  >
+                    {partner.name}
+                  </span>
+                ),
+              ),
+            )}
           </div>
         </div>
       </section>

@@ -8,8 +8,10 @@ import { savePartner } from "../_actions/partners";
 import { FormAlert } from "./Alerts";
 import { SubmitButton } from "./buttons";
 import { describedBy, Field } from "./Field";
+import type { ImageOption } from "@/lib/admin/images";
+import { ImagePicker } from "./ImagePicker";
 
-export function PartnerForm({ partner }: { partner?: Partner }) {
+export function PartnerForm({ partner, logoOptions }: { partner?: Partner; logoOptions: ImageOption[] }) {
   const { state, onSubmit, pending } = useActionForm(savePartner, idleState);
   const errors = state.fieldErrors ?? {};
 
@@ -49,6 +51,14 @@ export function PartnerForm({ partner }: { partner?: Partner }) {
           aria-describedby={describedBy("website", false, errors.website)}
         />
       </Field>
+      <ImagePicker
+        name="logo"
+        label="Logo (facultatif)"
+        defaultValue={partner?.logo}
+        options={logoOptions}
+        error={errors.logo}
+        allowEmpty
+      />
       <Field id="sortOrder" label="Ordre d'affichage">
         <input
           id="sortOrder"

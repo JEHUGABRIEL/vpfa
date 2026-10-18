@@ -96,7 +96,9 @@ export default function LegalPage() {
         <p>
           Le site n&apos;utilise ni cookie publicitaire, ni outil de mesure
           d&apos;audience. Seul l&apos;espace d&apos;administration dépose un
-          cookie de session, nécessaire à la connexion de l&apos;équipe. Les boutons de partage renvoient vers Facebook et
+          cookie de session, nécessaire à la connexion de l&apos;équipe. La carte de
+          la page <Link href="/a-propos#nous-trouver">À propos</Link> est fournie par
+          Google Maps, qui peut déposer ses propres cookies. Les boutons de partage renvoient vers Facebook et
           WhatsApp : ces services appliquent leur propre politique de
           confidentialité lorsque vous les utilisez.
         </p>

@@ -10,13 +10,14 @@ import { type AdminFormState, invalid } from "@/lib/admin/form";
 import { record } from "@/lib/audit";
 import { requireAdmin } from "@/lib/auth/session";
 import { tags } from "@/lib/content";
-import { checkbox, idField, optionalText, requiredText } from "./shared";
+import { checkbox, idField, imageField, optionalText, requiredText } from "./shared";
 
 const partnerSchema = z.object({
   name: requiredText(200, "Le nom"),
   short: optionalText(40),
   type: optionalText(80),
   website: z.union([z.literal(""), z.string().trim().url("Adresse web invalide (https://…).")]),
+  logo: z.union([z.literal(""), imageField]),
   sortOrder: z.coerce.number().int().min(0).max(999),
   featured: checkbox,
   published: checkbox,

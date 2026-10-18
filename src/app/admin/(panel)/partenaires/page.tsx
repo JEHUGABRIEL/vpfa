@@ -1,10 +1,12 @@
 import { asc } from "drizzle-orm";
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { ConfirmDialog } from "../../_components/ConfirmDialog";
 import { Icon } from "@/components/Icon";
 import { db } from "@/db";
 import { partners } from "@/db/schema";
+import { getLogoOptions } from "@/lib/admin/queries";
 import { requireAdmin } from "@/lib/auth/session";
 import { deletePartner, togglePartner } from "../../_actions/partners";
 import { Flash, PublishedBadge } from "../../_components/Alerts";
@@ -16,7 +18,10 @@ export const metadata: Metadata = { title: "Partenaires" };
 export default async function PartnersAdminPage({ searchParams }: PageProps<"/admin/partenaires">) {
   await requireAdmin();
   const { ok } = await searchParams;
-  const rows = await db.select().from(partners).orderBy(asc(partners.sortOrder), asc(partners.id));
+  const [rows, logoOptions] = await Promise.all([
+    db.select().from(partners).orderBy(asc(partners.sortOrder), asc(partners.id)),
+    getLogoOptions(),
+  ]);
 
   return (
     <>
@@ -45,12 +50,19 @@ export default async function PartnersAdminPage({ searchParams }: PageProps<"/ad
               <tbody>
                 {rows.map((row) => (
                   <tr key={row.id}>
-                    <td>
+                    <td className="adm-partner-cell">
+                      {row.logo ? (
+                        <Image src={row.logo} alt="" width={56} height={36} className="adm-logo-thumb" />
+                      ) : (
+                        <span className="adm-logo-thumb adm-logo-empty" aria-hidden="true" />
+                      )}
+                      <span>
                       <Link href={`/admin/partenaires/${row.id}`} className="adm-row-title">
                         {row.name}
                       </Link>
                       <span className="adm-row-sub">
                         {[row.featured ? "Principal" : "", row.type].filter(Boolean).join(" · ") || "-"}
+                      </span>
                       </span>
                     </td>
                     <td className="num">{row.sortOrder}</td>
@@ -104,7 +116,7 @@ export default async function PartnersAdminPage({ searchParams }: PageProps<"/ad
 
         <section className="adm-card">
           <h2>Ajouter un partenaire</h2>
-          <PartnerForm />
+          <PartnerForm logoOptions={logoOptions} />
         </section>
       </div>
     </>

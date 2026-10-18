@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/db";
 import { partners } from "@/db/schema";
+import { getLogoOptions } from "@/lib/admin/queries";
 import { requireAdmin } from "@/lib/auth/session";
 import { Icon } from "@/components/Icon";
 import { deletePartner } from "../../../_actions/partners";
@@ -17,7 +18,10 @@ export default async function EditPartnerPage({ params }: PageProps<"/admin/part
   await requireAdmin();
   const id = Number((await params).id);
   if (!Number.isInteger(id)) notFound();
-  const [partner] = await db.select().from(partners).where(eq(partners.id, id)).limit(1);
+  const [[partner], logoOptions] = await Promise.all([
+    db.select().from(partners).where(eq(partners.id, id)).limit(1),
+    getLogoOptions(),
+  ]);
   if (!partner) notFound();
 
   return (
@@ -33,7 +37,7 @@ export default async function EditPartnerPage({ params }: PageProps<"/admin/part
       <div className="adm-form-grid">
         <section className="adm-card">
           <h2>Informations</h2>
-          <PartnerForm partner={partner} />
+          <PartnerForm partner={partner} logoOptions={logoOptions} />
         </section>
         <div>
           <section className="adm-card">

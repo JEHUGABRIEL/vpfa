@@ -11,11 +11,16 @@ export function ImagePicker({
   defaultValue,
   options,
   error,
+  label = "Image",
+  allowEmpty = false,
 }: {
   name: string;
   defaultValue?: string;
   options: ImageOption[];
   error?: string;
+  label?: string;
+  /** Shows a button to remove the image (optional fields such as a partner logo). */
+  allowEmpty?: boolean;
 }) {
   const [items, setItems] = useState(options);
   const [selected, setSelected] = useState(defaultValue ?? "");
@@ -46,7 +51,7 @@ export function ImagePicker({
 
   return (
     <div className="adm-field">
-      <span>Image</span>
+      <span>{label}</span>
       <input type="hidden" name={name} value={selected} />
       <div className="adm-picker-preview">
         {selected ? (
@@ -84,6 +89,11 @@ export function ImagePicker({
           <Icon name="plus" size={16} />
           {pending ? "Envoi…" : "Téléverser"}
         </button>
+        {allowEmpty && selected ? (
+          <button type="button" className="adm-btn adm-btn-ghost adm-btn-sm" onClick={() => setSelected("")}>
+            Retirer
+          </button>
+        ) : null}
       </div>
       <span className="adm-hint">JPEG, PNG ou WebP, 3 Mo maximum. Format paysage conseillé.</span>
       {uploadError || error ? <span className="adm-error">{uploadError || error}</span> : null}

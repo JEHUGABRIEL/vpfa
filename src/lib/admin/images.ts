@@ -8,6 +8,18 @@ export const builtInImages: ImageOption[] = photoCredits.map((photo) => ({
   label: photo.alt,
 }));
 
+const partnerLogoFiles = [
+  "min-economie-numerique", "min-arts-culture-tourisme", "minusca", "onu-femmes",
+  "women-humanitarian-fund", "backson", "zaras-global-business", "koussala-technologies",
+  "ldcaj", "adora", "elegance-invest",
+];
+
+/** Partner logos shipped with the site (public/images/partenaires). */
+export const partnerLogos: ImageOption[] = partnerLogoFiles.map((file) => ({
+  src: `/images/partenaires/${file}.png`,
+  label: file.replace(/-/g, " "),
+}));
+
 export const MAX_UPLOAD_BYTES = 3 * 1024 * 1024;
 
 const signatures: { mime: string; test: (bytes: Uint8Array) => boolean }[] = [

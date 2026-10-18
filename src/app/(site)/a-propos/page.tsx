@@ -5,7 +5,7 @@ import { CtaBand } from "@/components/CtaBand";
 import { Icon } from "@/components/Icon";
 import { PageHero } from "@/components/PageHero";
 import { SectionHeading } from "@/components/SectionHeading";
-import { site, values } from "@/lib/site";
+import { presidentMessage, site, values } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "À propos",
@@ -86,25 +86,111 @@ export default function AboutPage() {
         />
       </section>
 
-      <section className="section tint">
-        <div className="wrap">
-          <SectionHeading
-            kicker="Nos valeurs"
+      <section className="section tint" id="presidente">
+        <div className="wrap president">
+          <figure className="president-photo">
+            <Image
+              src="/images/presidente.webp"
+              alt={`${site.president}, présidente de l'ONG VPFA`}
+              width={420}
+              height={632}
+              sizes="(max-width: 980px) 70vw, 360px"
+            />
+          </figure>
+          <div>
+            <SectionHeading
+              kicker="Mot de la présidente"
+              title={
+                <>
+                  <span className="lt">Une conviction</span>{" "}
+                  <span className="hd">qui nous rassemble.</span>
+                </>
+              }
+            />
+            <blockquote className="president-text">
+              {presidentMessage.map((paragraph) => (
+                <p key={paragraph.slice(0, 24)}>{paragraph}</p>
+              ))}
+            </blockquote>
+            <p className="president-sign">
+              <strong>{site.president}</strong>
+              <span>{site.presidentRole}</span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="section wrap">
+        <SectionHeading
+          kicker="Nos valeurs"
             title={
               <>
                 <span className="lt">Ce qui nous</span>{" "}
                 <span className="hd">fait avancer.</span>
               </>
             }
-            intro="Nos valeurs se lisent dans notre façon d'écouter, de former et d'accompagner, à Bangui comme en province."
-          />
-          <div className="values">
-            {values.map((value) => (
-              <div key={value.title}>
-                <h3>{value.title}</h3>
-                <p>{value.text}</p>
-              </div>
-            ))}
+          intro="Nos valeurs se lisent dans notre façon d'écouter, de former et d'accompagner, à Bangui comme en province."
+        />
+        <div className="values">
+          {values.map((value) => (
+            <div key={value.title}>
+              <h3>{value.title}</h3>
+              <p>{value.text}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="section tint" id="nous-trouver">
+        <div className="wrap two align-start">
+          <div>
+            <SectionHeading
+              kicker="Nous trouver"
+              title={
+                <>
+                  <span className="lt">Notre siège</span>{" "}
+                  <span className="hd">à Bangui.</span>
+                </>
+              }
+            />
+            <ul className="visit-list">
+              <li>
+                <Icon name="pin" size={20} />
+                <span>{site.location}</span>
+              </li>
+              <li>
+                <Icon name="phone" size={20} />
+                <span>
+                  <a href={`tel:${site.phoneHref}`}>{site.phone}</a> ·{" "}
+                  <a href={`tel:${site.phone2Href}`}>{site.phone2}</a>
+                </span>
+              </li>
+              <li>
+                <Icon name="mail" size={20} />
+                <a href={`mailto:${site.email}`}>{site.email}</a>
+              </li>
+              <li>
+                <Icon name="calendar" size={20} />
+                <span>Visites sur rendez-vous, du lundi au samedi.</span>
+              </li>
+            </ul>
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(site.mapQuery)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-brand"
+            >
+              Ouvrir dans Google Maps
+              <Icon name="external" size={16} />
+            </a>
+          </div>
+          <div className="map-frame">
+            <iframe
+              title={`Carte : ${site.mapQuery}`}
+              src={`https://www.google.com/maps?q=${encodeURIComponent(site.mapQuery)}&z=13&output=embed`}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
           </div>
         </div>
       </section>

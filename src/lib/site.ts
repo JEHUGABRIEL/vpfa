@@ -19,6 +19,8 @@ export const site = {
   president: "Élodie Francine Moussa",
   presidentRole:
     "Présidente du Conseil d'administration, conseillère municipale de Bangui",
+  /** Search used by the Google Maps embed on the "À propos" page. Replace with the exact office address. */
+  mapQuery: "Bangui, République centrafricaine",
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://vpfa.vercel.app",
   hosting: {
     name: "Vercel Inc.",
@@ -26,6 +28,16 @@ export const site = {
     url: "https://vercel.com",
   },
 } as const;
+
+/**
+ * "Mot de la présidente" on the À propos page.
+ * Draft written for the site: to be read and validated by the president before publication.
+ */
+export const presidentMessage = [
+  "Quand nous avons créé l'ONG VPFA en 2024, nous partions d'une conviction simple : une femme qui a un métier, des revenus et confiance en elle change sa famille, et souvent tout son quartier.",
+  "À Bangui comme dans la Lobaye, j'ai rencontré des femmes pleines de talent à qui il manquait seulement une occasion de le montrer. Nos formations en saponification et en perlage, nos journées avec les jeunes filles et avec les communautés Aka sont nées de ces rencontres.",
+  "Rien de cela ne serait possible sans nos partenaires, nos bénévoles et toutes celles qui osent pousser notre porte. Je les remercie sincèrement. Si vous partagez notre vision, rejoignez-nous : il y a une place pour chacune et pour chacun.",
+];
 
 export const navigation = [
   { label: "Accueil", href: "/" },
