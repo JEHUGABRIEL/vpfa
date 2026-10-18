@@ -36,6 +36,8 @@ export const admins = pgTable("admins", {
   name: text("name").notNull(),
   passwordHash: text("password_hash").notNull(),
   lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
+  /** Notifications created after this date are unread for this admin. */
+  notificationsSeenAt: timestamp("notifications_seen_at", { withTimezone: true }),
   ...timestamps,
 });
 
@@ -174,6 +176,41 @@ export const media = pgTable("media", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+/** Everything that happens on the site and in the back office. */
+export const auditLogs = pgTable(
+  "audit_logs",
+  {
+    id: serial("id").primaryKey(),
+    /** Null for visitors and for failed logins. */
+    adminId: integer("admin_id"),
+    actor: text("actor").notNull(),
+    action: text("action").notNull(),
+    entity: text("entity").notNull().default(""),
+    entityId: text("entity_id").notNull().default(""),
+    summary: text("summary").notNull(),
+    ip: text("ip").notNull().default(""),
+    userAgent: text("user_agent").notNull().default(""),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("audit_logs_created_idx").on(table.createdAt),
+    index("audit_logs_action_idx").on(table.action, table.createdAt),
+  ],
+);
+
+export const notifications = pgTable(
+  "notifications",
+  {
+    id: serial("id").primaryKey(),
+    kind: text("kind").notNull(),
+    title: text("title").notNull(),
+    body: text("body").notNull().default(""),
+    href: text("href").notNull().default(""),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("notifications_created_idx").on(table.createdAt)],
+);
+
 export type Formation = typeof formations.$inferSelect;
 export type Post = typeof posts.$inferSelect;
 export type Partner = typeof partners.$inferSelect;
@@ -183,3 +220,5 @@ export type RequestStatus = (typeof requestStatus.enumValues)[number];
 export type PaymentStatus = (typeof paymentStatus.enumValues)[number];
 export type PaymentMethod = (typeof paymentMethod.enumValues)[number];
 export type Testimonial = typeof testimonials.$inferSelect;
+export type AuditLog = typeof auditLogs.$inferSelect;
+export type Notification = typeof notifications.$inferSelect;

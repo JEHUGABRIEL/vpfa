@@ -7,6 +7,7 @@ import { db } from "@/db";
 import { admins } from "@/db/schema";
 import { type AdminFormState, invalid, isUniqueViolation } from "@/lib/admin/form";
 import { hashPassword, MIN_PASSWORD_LENGTH, verifyPassword } from "@/lib/auth/password";
+import { record } from "@/lib/audit";
 import { requireAdmin } from "@/lib/auth/session";
 import { idField, requiredText } from "./shared";
 
@@ -25,7 +26,7 @@ export async function createAdmin(
   _previous: AdminFormState,
   formData: FormData,
 ): Promise<AdminFormState> {
-  await requireAdmin();
+  const me = await requireAdmin();
   const parsed = createSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return invalid(parsed.error);
 
@@ -46,6 +47,9 @@ export async function createAdmin(
     throw error;
   }
 
+  await record(me, "compte", `Création du compte administrateur de ${parsed.data.name} (${parsed.data.email})`, {
+    entity: "compte",
+  });
   refresh();
   return { status: "success", message: `Compte créé pour ${parsed.data.name}.` };
 }
@@ -74,6 +78,10 @@ export async function changePassword(
     .from(admins)
     .where(eq(admins.id, me.id));
   if (!row || !(await verifyPassword(parsed.data.current, row.passwordHash))) {
+    await record(me, "mot_de_passe", `${me.name} a saisi un mot de passe actuel incorrect`, {
+      entity: "compte",
+      entityId: me.id,
+    });
     return {
       status: "error",
       message: "Mot de passe actuel incorrect.",
@@ -85,6 +93,7 @@ export async function changePassword(
     .update(admins)
     .set({ passwordHash: await hashPassword(parsed.data.next) })
     .where(eq(admins.id, me.id));
+  await record(me, "mot_de_passe", `${me.name} a changé son mot de passe`, { entity: "compte", entityId: me.id });
   return { status: "success", message: "Mot de passe modifié." };
 }
 
@@ -92,6 +101,15 @@ export async function deleteAdmin(formData: FormData) {
   const me = await requireAdmin();
   const id = idField.parse(formData.get("id"));
   if (id === me.id) return;
-  await db.delete(admins).where(eq(admins.id, id));
+  const [removed] = await db
+    .delete(admins)
+    .where(eq(admins.id, id))
+    .returning({ name: admins.name, email: admins.email });
+  if (removed) {
+    await record(me, "compte", `Retrait de l'accès de ${removed.name} (${removed.email})`, {
+      entity: "compte",
+      entityId: id,
+    });
+  }
   refresh();
 }

@@ -7,6 +7,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { type PostMeta, posts } from "@/db/schema";
 import { type AdminFormState, invalid, isUniqueViolation, lines, slugify } from "@/lib/admin/form";
+import { record } from "@/lib/audit";
 import { requireAdmin } from "@/lib/auth/session";
 import { tags } from "@/lib/content";
 import { checkbox, idField, imageField, optionalText, requiredText } from "./shared";
@@ -34,11 +35,12 @@ function parseMeta(value: FormDataEntryValue | null): PostMeta[] {
 }
 
 export async function savePost(_previous: AdminFormState, formData: FormData): Promise<AdminFormState> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const parsed = postSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return invalid(parsed.error);
 
   const id = formData.get("id") ? idField.parse(formData.get("id")) : null;
+  let savedId = id;
   const values = {
     ...parsed.data,
     slug: slugify(parsed.data.slug || parsed.data.title),
@@ -49,7 +51,8 @@ export async function savePost(_previous: AdminFormState, formData: FormData): P
     if (id) {
       await db.update(posts).set(values).where(eq(posts.id, id));
     } else {
-      await db.insert(posts).values(values);
+      const [created] = await db.insert(posts).values(values).returning({ id: posts.id });
+      savedId = created.id;
     }
   } catch (error) {
     if (isUniqueViolation(error)) {
@@ -62,24 +65,45 @@ export async function savePost(_previous: AdminFormState, formData: FormData): P
     throw error;
   }
 
+  await record(admin, id ? "modification" : "creation", `${id ? "Modification" : "Création"} de l'article « ${values.title} »`, {
+    entity: "posts",
+    entityId: savedId ?? "",
+  });
   updateTag(tags.posts);
   redirect(`/admin/actualites?ok=${id ? "updated" : "created"}`);
 }
 
 export async function togglePost(formData: FormData) {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const id = idField.parse(formData.get("id"));
-  await db
+  const published = formData.get("published") === "true";
+  const [row] = await db
     .update(posts)
-    .set({ published: formData.get("published") === "true" })
-    .where(eq(posts.id, id));
+    .set({ published })
+    .where(eq(posts.id, id))
+    .returning({ id: posts.id, name: posts.title });
+  if (row) {
+    await record(admin, published ? "publication" : "masquage", `${published ? "Mise en ligne" : "Masquage"} de l'article « ${row.name} »`, {
+      entity: "posts",
+      entityId: row.id,
+    });
+  }
   updateTag(tags.posts);
   refresh();
 }
 
 export async function deletePost(formData: FormData) {
-  await requireAdmin();
-  await db.delete(posts).where(eq(posts.id, idField.parse(formData.get("id"))));
+  const admin = await requireAdmin();
+  const [removed] = await db
+    .delete(posts)
+    .where(eq(posts.id, idField.parse(formData.get("id"))))
+    .returning({ id: posts.id, name: posts.title });
+  if (removed) {
+    await record(admin, "suppression", `Suppression de l'article « ${removed.name} »`, {
+      entity: "posts",
+      entityId: removed.id,
+    });
+  }
   updateTag(tags.posts);
   redirect("/admin/actualites?ok=deleted");
 }

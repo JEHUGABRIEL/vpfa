@@ -7,7 +7,8 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/db";
 import { formations, messages, registrations, testimonials } from "@/db/schema";
-import { NEXT_SESSIONS } from "@/lib/registration";
+import { notify, record } from "@/lib/audit";
+import { NEXT_SESSIONS, paymentMethodLabels } from "@/lib/registration";
 import { site } from "@/lib/site";
 
 export type FormState = {
@@ -72,16 +73,25 @@ export async function submitRegistration(
   }
 
   const token = randomBytes(18).toString("base64url");
+  let reference = "";
   try {
     const [row] = await db
       .insert(registrations)
       .values({ ...data, formation: title, amount, token })
       .returning({ id: registrations.id, createdAt: registrations.createdAt });
     const year = String(row.createdAt.getUTCFullYear()).slice(2);
-    await db
-      .update(registrations)
-      .set({ reference: `VPFA-${year}-${String(row.id).padStart(4, "0")}` })
-      .where(eq(registrations.id, row.id));
+    reference = `VPFA-${year}-${String(row.id).padStart(4, "0")}`;
+    await db.update(registrations).set({ reference }).where(eq(registrations.id, row.id));
+    await record({ visitor: data.name }, "inscription", `Nouvelle inscription ${reference} : ${title}`, {
+      entity: "inscriptions",
+      entityId: row.id,
+    });
+    await notify({
+      kind: "inscription",
+      title: `Nouvelle inscription de ${data.name}`,
+      body: `${reference} · ${title}${amount ? ` · ${amount}` : ""} · ${paymentMethodLabels[data.paymentMethod]}`,
+      href: `/admin/inscriptions#dossier-${row.id}`,
+    });
   } catch (error) {
     console.error("submitRegistration", error);
     return {
@@ -125,11 +135,29 @@ export async function declarePayment(
         inArray(registrations.paymentStatus, ["en_attente", "declare"]),
       ),
     )
-    .returning({ id: registrations.id });
+    .returning({
+      id: registrations.id,
+      name: registrations.name,
+      reference: registrations.reference,
+      amount: registrations.amount,
+    });
 
   if (updated.length === 0) {
     return { status: "error", message: "Ce dossier ne peut plus être modifié. Contactez l'équipe." };
   }
+  const [file] = updated;
+  await record(
+    { visitor: file.name },
+    "paiement_declare",
+    `Paiement déclaré pour ${file.reference} (ID ${parsed.data.transactionId})`,
+    { entity: "inscriptions", entityId: file.id },
+  );
+  await notify({
+    kind: "paiement",
+    title: `Paiement à vérifier : ${file.reference}`,
+    body: `${file.name} déclare avoir payé ${file.amount || ""} (ID ${parsed.data.transactionId}).`,
+    href: `/admin/inscriptions?statut=declare#dossier-${file.id}`,
+  });
   refresh();
   return {
     status: "success",
@@ -153,7 +181,17 @@ export async function submitMessage(_previous: FormState, formData: FormData): P
 
   const data = parsed.data;
   try {
-    await db.insert(messages).values(data);
+    const [row] = await db.insert(messages).values(data).returning({ id: messages.id });
+    await record({ visitor: data.name }, "message", `Message reçu : ${data.subject}`, {
+      entity: "messages",
+      entityId: row.id,
+    });
+    await notify({
+      kind: "message",
+      title: `Nouveau message de ${data.name}`,
+      body: `${data.subject} · ${data.message.slice(0, 120)}`,
+      href: `/admin/messages#demande-${row.id}`,
+    });
   } catch (error) {
     console.error("submitMessage", error);
     return {
@@ -196,7 +234,20 @@ export async function submitTestimonial(
 
   const { name, role, message } = parsed.data;
   try {
-    await db.insert(testimonials).values({ name, role, message });
+    const [row] = await db
+      .insert(testimonials)
+      .values({ name, role, message })
+      .returning({ id: testimonials.id });
+    await record({ visitor: name }, "temoignage", `Témoignage reçu de ${name}`, {
+      entity: "temoignages",
+      entityId: row.id,
+    });
+    await notify({
+      kind: "temoignage",
+      title: `Témoignage à relire : ${name}`,
+      body: message.slice(0, 140),
+      href: "/admin/temoignages",
+    });
   } catch (error) {
     console.error("submitTestimonial", error);
     return { status: "error", message: "L'envoi a échoué. Réessayez dans un instant." };

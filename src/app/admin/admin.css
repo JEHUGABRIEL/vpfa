@@ -1001,3 +1001,179 @@ textarea.adm-input {
   background: rgba(255, 255, 255, 0.08);
   color: #fff;
 }
+
+/* Notification bell */
+.adm-bell {
+  position: relative;
+}
+.adm-btn.adm-bell-btn {
+  position: relative;
+  min-height: 38px;
+  width: 40px;
+  padding: 0;
+}
+.adm-bell-count {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--adm-danger);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
+}
+.adm-bell-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 50;
+  width: min(92vw, 380px);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 18px 40px rgba(7, 35, 25, 0.16);
+  overflow: hidden;
+}
+.adm-bell-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+}
+.adm-link-btn {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: 600 0.82rem var(--f);
+  color: var(--brand-d);
+  cursor: pointer;
+}
+.adm-link-btn:hover {
+  text-decoration: underline;
+}
+.adm-bell-empty {
+  padding: 1.6rem 1rem;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin: 0;
+}
+.adm-bell-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 380px;
+  overflow-y: auto;
+}
+.adm-bell-list li + li {
+  border-top: 1px solid var(--line);
+}
+.adm .adm-bell-list a {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.8rem 1rem;
+  text-decoration: none;
+  color: var(--text);
+}
+.adm .adm-bell-list a:hover {
+  background: var(--adm-bg);
+}
+.adm-bell-list li[data-unread="true"] a {
+  background: #f1f8f4;
+}
+.adm-bell-icon {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--grey);
+  color: var(--brand-d);
+}
+.adm-bell-text {
+  display: grid;
+  gap: 0.1rem;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  min-width: 0;
+}
+.adm-bell-text strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+.adm-bell-text span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.adm-bell-text time {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.adm .adm-bell-all {
+  display: block;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--line);
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* Notifications page */
+.adm-notif-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.adm-notif-list li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.9rem;
+  align-items: start;
+  padding: 0.9rem 0;
+  border-top: 1px solid var(--line);
+}
+.adm-notif-list li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+.adm-notif-list li[data-unread="true"] .adm-row-title::after {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-left: 0.5rem;
+  border-radius: 50%;
+  background: var(--adm-danger);
+  vertical-align: middle;
+}
+
+/* Activity log */
+.adm-nowrap {
+  white-space: nowrap;
+}
+.adm-badge-danger {
+  background: var(--adm-danger-bg);
+  color: var(--adm-danger);
+}
+.adm-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.adm-muted {
+  color: var(--muted);
+  font-size: 0.85rem;
+}

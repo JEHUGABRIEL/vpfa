@@ -4,12 +4,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Icon, type IconName } from "@/components/Icon";
 
-type Counts = { inscriptions: number; messages: number; temoignages: number };
+type Counts = { inscriptions: number; messages: number; temoignages: number; notifications: number };
 
 const groups: { label: string; items: { href: string; label: string; icon: IconName; count?: keyof Counts }[] }[] = [
   {
     label: "Pilotage",
-    items: [{ href: "/admin", label: "Tableau de bord", icon: "dashboard" }],
+    items: [
+      { href: "/admin", label: "Tableau de bord", icon: "dashboard" },
+      { href: "/admin/notifications", label: "Notifications", icon: "bell", count: "notifications" },
+    ],
   },
   {
     label: "Contenus",
@@ -30,7 +33,10 @@ const groups: { label: string; items: { href: string; label: string; icon: IconN
   },
   {
     label: "Réglages",
-    items: [{ href: "/admin/comptes", label: "Comptes", icon: "key" }],
+    items: [
+      { href: "/admin/journal", label: "Journal d'activité", icon: "history" },
+      { href: "/admin/comptes", label: "Comptes", icon: "key" },
+    ],
   },
 ];
 

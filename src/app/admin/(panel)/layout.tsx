@@ -10,6 +10,8 @@ import { logout } from "../_actions/auth";
 import { AdminNav } from "../_components/AdminNav";
 import { AdminShell } from "../_components/AdminShell";
 import { ConfirmDialog } from "../_components/ConfirmDialog";
+import { NotificationBell } from "../_components/NotificationBell";
+import { getFeed } from "@/lib/admin/notifications";
 
 function LogoutButton({ className }: { className: string }) {
   return (
@@ -31,8 +33,8 @@ function LogoutButton({ className }: { className: string }) {
 }
 
 async function NavWithCounts() {
-  await requireAdmin();
-  const [[newRegistrations], [newMessages], [pendingTestimonials]] = await Promise.all([
+  const admin = await requireAdmin();
+  const [[newRegistrations], [newMessages], [pendingTestimonials], feed] = await Promise.all([
     // New files and declared payments both need someone from the team.
     db
       .select({ value: count() })
@@ -40,6 +42,7 @@ async function NavWithCounts() {
       .where(or(eq(registrations.status, "nouveau"), eq(registrations.paymentStatus, "declare"))),
     db.select({ value: count() }).from(messages).where(eq(messages.status, "nouveau")),
     db.select({ value: count() }).from(testimonials).where(eq(testimonials.approved, false)),
+    getFeed(admin.id, 0),
   ]);
   return (
     <AdminNav
@@ -47,6 +50,7 @@ async function NavWithCounts() {
         inscriptions: newRegistrations.value,
         messages: newMessages.value,
         temoignages: pendingTestimonials.value,
+        notifications: feed.unread,
       }}
     />
   );
@@ -54,6 +58,7 @@ async function NavWithCounts() {
 
 async function CurrentAdmin() {
   const admin = await requireAdmin();
+  const feed = await getFeed(admin.id);
   const initials = admin.name
     .split(/\s+/)
     .map((part) => part[0])
@@ -63,6 +68,7 @@ async function CurrentAdmin() {
 
   return (
     <div className="adm-user">
+      <NotificationBell initial={feed} />
       <span className="adm-avatar" aria-hidden="true">
         {initials}
       </span>
@@ -91,10 +97,6 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
             <NavWithCounts />
           </Suspense>
           <div className="adm-side-foot">
-            <Link href="/" target="_blank">
-              <Icon name="external" size={16} />
-              Voir le site
-            </Link>
             <LogoutButton className="adm-side-logout" />
           </div>
         </>

@@ -1,6 +1,8 @@
 import { desc } from "drizzle-orm";
 import { db } from "@/db";
-import { messages, registrations } from "@/db/schema";
+import { auditLogs, messages, registrations } from "@/db/schema";
+import { actionLabels } from "@/lib/admin/audit-labels";
+import type { AuditAction } from "@/lib/audit";
 import { statusLabels } from "@/lib/admin/status";
 import { paymentMethodLabels, paymentStatusLabels } from "@/lib/registration";
 import { requireAdmin } from "@/lib/auth/session";
@@ -40,6 +42,16 @@ export async function GET(_request: Request, { params }: RouteContext<"/admin/ex
     csv = toCsv(
       ["Date", "Nom", "E-mail", "Téléphone", "Objet", "Message", "Statut", "Note interne"],
       rows.map((r) => [r.createdAt, r.name, r.email, r.phone, r.subject, r.message, statusLabels[r.status], r.adminNote]),
+    );
+  } else if (kind === "journal") {
+    const rows = await db.select().from(auditLogs).orderBy(desc(auditLogs.createdAt));
+    csv = toCsv(
+      ["Date", "Auteur", "Type", "Action", "Détail", "Élément", "Adresse IP", "Navigateur"],
+      rows.map((r) => [
+        r.createdAt, r.actor, r.adminId ? "Administrateur" : "Visiteur",
+        actionLabels[r.action as AuditAction] ?? r.action, r.summary,
+        [r.entity, r.entityId].filter(Boolean).join(" #"), r.ip, r.userAgent,
+      ]),
     );
   } else {
     return new Response("Not found", { status: 404 });
