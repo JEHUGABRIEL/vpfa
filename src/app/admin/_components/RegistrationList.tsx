@@ -1,5 +1,6 @@
 import { count, desc, eq } from "drizzle-orm";
 import Link from "next/link";
+import { ConfirmDialog } from "./ConfirmDialog";
 import { Icon } from "@/components/Icon";
 import { db } from "@/db";
 import { type PaymentStatus, registrations } from "@/db/schema";
@@ -7,7 +8,7 @@ import { formatDateTime } from "@/lib/admin/status";
 import { paymentMethodLabels, paymentStatusLabels, paymentStatusOrder } from "@/lib/registration";
 import { deleteRequest } from "../_actions/requests";
 import { saveRegistrationNote, setPaymentStatus } from "../_actions/registrations";
-import { ConfirmSubmit, SubmitButton } from "./buttons";
+import { SubmitButton } from "./buttons";
 
 function whatsapp(phone: string, reference: string | null) {
   const digits = phone.replace(/[^\d]/g, "");
@@ -16,12 +17,12 @@ function whatsapp(phone: string, reference: string | null) {
   return `https://wa.me/${digits}${text}`;
 }
 
-function StatusButton({ id, to, label, icon, primary }: { id: number; to: PaymentStatus; label: string; icon: "check" | "close" | "arrow-right"; primary?: boolean }) {
+function StatusButton({ id, to, label, icon }: { id: number; to: PaymentStatus; label: string; icon: "arrow-right" }) {
   return (
     <form action={setPaymentStatus}>
       <input type="hidden" name="id" value={id} />
       <input type="hidden" name="paymentStatus" value={to} />
-      <SubmitButton className={`adm-btn adm-btn-sm ${primary ? "adm-btn-primary" : "adm-btn-ghost"}`} pendingLabel="…">
+      <SubmitButton className="adm-btn adm-btn-sm adm-btn-ghost" pendingLabel="…">
         <Icon name={icon} size={16} />
         {label}
       </SubmitButton>
@@ -144,13 +145,53 @@ export async function RegistrationList({ statut }: { statut?: string }) {
 
               <div className="adm-actions" style={{ justifyContent: "flex-start" }}>
                 {item.paymentStatus !== "confirme" && item.paymentStatus !== "annule" ? (
-                  <StatusButton id={item.id} to="confirme" label="Confirmer le paiement" icon="check" primary />
+                  <ConfirmDialog
+                    action={setPaymentStatus}
+                    fields={{ id: item.id, paymentStatus: "confirme" }}
+                    tone="primary"
+                    title={`Confirmer la place de ${item.name} ?`}
+                    description={
+                      item.paymentMethod === "orange_money" ? (
+                        <p>
+                          Vérifiez d&apos;abord sur votre relevé Orange Money que le transfert
+                          {item.transactionId ? ` ${item.transactionId}` : ""} de {item.amount || "ce montant"} a bien été reçu.
+                          La participante verra « Place confirmée » sur sa page de suivi.
+                        </p>
+                      ) : (
+                        <p>
+                          Confirmez seulement si le paiement en espèces de {item.amount || "ce montant"} a été
+                          reçu au bureau. La participante verra « Place confirmée » sur sa page de suivi.
+                        </p>
+                      )
+                    }
+                    confirmLabel="Confirmer le paiement"
+                    triggerClassName="adm-btn adm-btn-sm adm-btn-primary"
+                    trigger={
+                      <>
+                        <Icon name="check" size={16} />
+                        Confirmer le paiement
+                      </>
+                    }
+                  />
                 ) : null}
                 {item.paymentStatus === "confirme" || item.paymentStatus === "annule" || item.paymentStatus === "declare" ? (
                   <StatusButton id={item.id} to="en_attente" label="Remettre en attente" icon="arrow-right" />
                 ) : null}
                 {item.paymentStatus !== "annule" ? (
-                  <StatusButton id={item.id} to="annule" label="Annuler" icon="close" />
+                  <ConfirmDialog
+                    action={setPaymentStatus}
+                    fields={{ id: item.id, paymentStatus: "annule" }}
+                    title={`Annuler l'inscription ${item.reference ?? ""} ?`}
+                    description="La participante verra son inscription annulée sur sa page de suivi. Vous pourrez la remettre en attente si besoin."
+                    confirmLabel="Annuler l'inscription"
+                    triggerClassName="adm-btn adm-btn-sm adm-btn-ghost"
+                    trigger={
+                      <>
+                        <Icon name="close" size={16} />
+                        Annuler
+                      </>
+                    }
+                  />
                 ) : null}
               </div>
 
@@ -172,14 +213,21 @@ export async function RegistrationList({ statut }: { statut?: string }) {
                 </SubmitButton>
               </form>
 
-              <form action={deleteRequest} className="adm-actions">
-                <input type="hidden" name="kind" value="inscriptions" />
-                <input type="hidden" name="id" value={item.id} />
-                <ConfirmSubmit confirmLabel="Supprimer définitivement ?">
-                  <Icon name="trash" size={16} />
-                  Supprimer
-                </ConfirmSubmit>
-              </form>
+              <div className="adm-actions">
+                <ConfirmDialog
+                  action={deleteRequest}
+                  fields={{ kind: "inscriptions", id: item.id }}
+                  title="Supprimer définitivement ?"
+                  description="Cette action est définitive et ne peut pas être annulée."
+                  confirmLabel="Supprimer"
+                  trigger={
+                    <>
+                      <Icon name="trash" size={16} />
+                    Supprimer
+                    </>
+                  }
+                />
+              </div>
             </section>
           );
         })

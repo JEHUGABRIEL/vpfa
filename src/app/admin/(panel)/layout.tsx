@@ -9,6 +9,26 @@ import { requireAdmin } from "@/lib/auth/session";
 import { logout } from "../_actions/auth";
 import { AdminNav } from "../_components/AdminNav";
 import { AdminShell } from "../_components/AdminShell";
+import { ConfirmDialog } from "../_components/ConfirmDialog";
+
+function LogoutButton({ className }: { className: string }) {
+  return (
+    <ConfirmDialog
+      action={logout}
+      tone="neutral"
+      title="Se déconnecter ?"
+      description="Vous devrez saisir à nouveau votre e-mail et votre mot de passe pour revenir au back-office."
+      confirmLabel="Se déconnecter"
+      triggerClassName={className}
+      trigger={
+        <>
+          <Icon name="logout" size={16} />
+          Déconnexion
+        </>
+      }
+    />
+  );
+}
 
 async function NavWithCounts() {
   await requireAdmin();
@@ -50,12 +70,7 @@ async function CurrentAdmin() {
         <strong>{admin.name}</strong>
         <small>{admin.email}</small>
       </span>
-      <form action={logout}>
-        <button type="submit" className="adm-btn adm-btn-ghost adm-btn-sm">
-          <Icon name="logout" size={16} />
-          Déconnexion
-        </button>
-      </form>
+      <LogoutButton className="adm-btn adm-btn-ghost adm-btn-sm" />
     </div>
   );
 }
@@ -80,6 +95,7 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
               <Icon name="external" size={16} />
               Voir le site
             </Link>
+            <LogoutButton className="adm-side-logout" />
           </div>
         </>
       }

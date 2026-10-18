@@ -1,5 +1,6 @@
 import { asc } from "drizzle-orm";
 import type { Metadata } from "next";
+import { ConfirmDialog } from "../../_components/ConfirmDialog";
 import { Icon } from "@/components/Icon";
 import { db } from "@/db";
 import { admins } from "@/db/schema";
@@ -7,7 +8,6 @@ import { formatDateTime } from "@/lib/admin/status";
 import { requireAdmin } from "@/lib/auth/session";
 import { deleteAdmin } from "../../_actions/accounts";
 import { ChangePasswordForm, CreateAdminForm } from "../../_components/AccountForms";
-import { ConfirmSubmit } from "../../_components/buttons";
 
 export const metadata: Metadata = { title: "Comptes" };
 
@@ -53,13 +53,19 @@ export default async function AccountsPage() {
                   <td>{row.lastLoginAt ? formatDateTime(row.lastLoginAt) : "Jamais"}</td>
                   <td>
                     {row.id === me.id ? null : (
-                      <form action={deleteAdmin} className="adm-actions">
-                        <input type="hidden" name="id" value={row.id} />
-                        <ConfirmSubmit confirmLabel="Retirer l'accès ?">
-                          <Icon name="trash" size={16} />
+                      <ConfirmDialog
+                        action={deleteAdmin}
+                        fields={{ id: row.id }}
+                        title="Retirer cet accès ?"
+                        description="La personne ne pourra plus se connecter au back-office."
+                        confirmLabel="Retirer l'accès"
+                        trigger={
+                          <>
+                            <Icon name="trash" size={16} />
                           Retirer
-                        </ConfirmSubmit>
-                      </form>
+                          </>
+                        }
+                      />
                     )}
                   </td>
                 </tr>

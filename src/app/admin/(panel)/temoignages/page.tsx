@@ -1,12 +1,13 @@
 import { asc, desc } from "drizzle-orm";
 import type { Metadata } from "next";
+import { ConfirmDialog } from "../../_components/ConfirmDialog";
 import { Icon } from "@/components/Icon";
 import { db } from "@/db";
 import { testimonials } from "@/db/schema";
 import { formatDateTime } from "@/lib/admin/status";
 import { requireAdmin } from "@/lib/auth/session";
 import { deleteTestimonial, setTestimonialApproved } from "../../_actions/testimonials";
-import { ConfirmSubmit, SubmitButton } from "../../_components/buttons";
+import { SubmitButton } from "../../_components/buttons";
 
 export const metadata: Metadata = { title: "Témoignages" };
 
@@ -66,13 +67,19 @@ export default async function TestimonialsAdminPage() {
                   {row.approved ? "Retirer du site" : "Publier"}
                 </SubmitButton>
               </form>
-              <form action={deleteTestimonial}>
-                <input type="hidden" name="id" value={row.id} />
-                <ConfirmSubmit>
-                  <Icon name="trash" size={16} />
+              <ConfirmDialog
+                action={deleteTestimonial}
+                fields={{ id: row.id }}
+                title="Supprimer définitivement ?"
+                description="Cette action est définitive et ne peut pas être annulée."
+                confirmLabel="Supprimer"
+                trigger={
+                  <>
+                    <Icon name="trash" size={16} />
                   Supprimer
-                </ConfirmSubmit>
-              </form>
+                  </>
+                }
+              />
             </div>
           </section>
         ))

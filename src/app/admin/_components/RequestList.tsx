@@ -1,11 +1,12 @@
 import { count, desc, eq } from "drizzle-orm";
 import Link from "next/link";
+import { ConfirmDialog } from "./ConfirmDialog";
 import { Icon } from "@/components/Icon";
 import { db } from "@/db";
 import { messages, registrations, type RequestStatus, requestStatus } from "@/db/schema";
 import { formatDateTime, statusLabels, statusOrder } from "@/lib/admin/status";
 import { deleteRequest, updateRequest } from "../_actions/requests";
-import { ConfirmSubmit, SubmitButton } from "./buttons";
+import { SubmitButton } from "./buttons";
 
 type Kind = "inscriptions" | "messages";
 
@@ -156,14 +157,21 @@ export async function RequestList({ kind, statut }: { kind: Kind; statut?: strin
                 </SubmitButton>
               </form>
 
-              <form action={deleteRequest} className="adm-actions">
-                <input type="hidden" name="kind" value={kind} />
-                <input type="hidden" name="id" value={item.id} />
-                <ConfirmSubmit confirmLabel="Supprimer définitivement ?">
-                  <Icon name="trash" size={16} />
-                  Supprimer
-                </ConfirmSubmit>
-              </form>
+              <div className="adm-actions">
+                <ConfirmDialog
+                  action={deleteRequest}
+                  fields={{ kind: kind, id: item.id }}
+                  title="Supprimer définitivement ?"
+                  description="Cette action est définitive et ne peut pas être annulée."
+                  confirmLabel="Supprimer"
+                  trigger={
+                    <>
+                      <Icon name="trash" size={16} />
+                    Supprimer
+                    </>
+                  }
+                />
+              </div>
             </section>
           );
         })

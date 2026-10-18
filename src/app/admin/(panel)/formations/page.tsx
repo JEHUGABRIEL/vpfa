@@ -2,13 +2,14 @@ import { asc } from "drizzle-orm";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { ConfirmDialog } from "../../_components/ConfirmDialog";
 import { Icon } from "@/components/Icon";
 import { db } from "@/db";
 import { formations } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth/session";
 import { deleteFormation, toggleFormation } from "../../_actions/formations";
 import { Flash, PublishedBadge } from "../../_components/Alerts";
-import { ConfirmSubmit, SubmitButton } from "../../_components/buttons";
+import { SubmitButton } from "../../_components/buttons";
 
 export const metadata: Metadata = { title: "Formations" };
 
@@ -93,13 +94,19 @@ export default async function FormationsAdminPage({
                             {row.published ? "Masquer" : "Publier"}
                           </SubmitButton>
                         </form>
-                        <form action={deleteFormation}>
-                          <input type="hidden" name="id" value={row.id} />
-                          <ConfirmSubmit>
-                            <Icon name="trash" size={16} />
+                        <ConfirmDialog
+                          action={deleteFormation}
+                          fields={{ id: row.id }}
+                          title="Supprimer définitivement ?"
+                          description="Cette action est définitive et ne peut pas être annulée."
+                          confirmLabel="Supprimer"
+                          trigger={
+                            <>
+                              <Icon name="trash" size={16} />
                             <span className="adm-sr">Supprimer {row.title}</span>
-                          </ConfirmSubmit>
-                        </form>
+                            </>
+                          }
+                        />
                       </div>
                     </td>
                   </tr>

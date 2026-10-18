@@ -2,6 +2,7 @@ import { desc } from "drizzle-orm";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { ConfirmDialog } from "../../_components/ConfirmDialog";
 import { Icon } from "@/components/Icon";
 import { db } from "@/db";
 import { posts } from "@/db/schema";
@@ -9,7 +10,7 @@ import { requireAdmin } from "@/lib/auth/session";
 import { formatDate } from "@/lib/content";
 import { deletePost, togglePost } from "../../_actions/posts";
 import { Flash, PublishedBadge } from "../../_components/Alerts";
-import { ConfirmSubmit, SubmitButton } from "../../_components/buttons";
+import { SubmitButton } from "../../_components/buttons";
 
 export const metadata: Metadata = { title: "Actualités" };
 
@@ -84,13 +85,19 @@ export default async function PostsAdminPage({ searchParams }: PageProps<"/admin
                             {row.published ? "Masquer" : "Publier"}
                           </SubmitButton>
                         </form>
-                        <form action={deletePost}>
-                          <input type="hidden" name="id" value={row.id} />
-                          <ConfirmSubmit>
-                            <Icon name="trash" size={16} />
+                        <ConfirmDialog
+                          action={deletePost}
+                          fields={{ id: row.id }}
+                          title="Supprimer définitivement ?"
+                          description="Cette action est définitive et ne peut pas être annulée."
+                          confirmLabel="Supprimer"
+                          trigger={
+                            <>
+                              <Icon name="trash" size={16} />
                             <span className="adm-sr">Supprimer {row.title}</span>
-                          </ConfirmSubmit>
-                        </form>
+                            </>
+                          }
+                        />
                       </div>
                     </td>
                   </tr>

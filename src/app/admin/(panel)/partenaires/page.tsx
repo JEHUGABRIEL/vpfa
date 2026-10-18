@@ -1,13 +1,14 @@
 import { asc } from "drizzle-orm";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ConfirmDialog } from "../../_components/ConfirmDialog";
 import { Icon } from "@/components/Icon";
 import { db } from "@/db";
 import { partners } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth/session";
 import { deletePartner, togglePartner } from "../../_actions/partners";
 import { Flash, PublishedBadge } from "../../_components/Alerts";
-import { ConfirmSubmit, SubmitButton } from "../../_components/buttons";
+import { SubmitButton } from "../../_components/buttons";
 import { PartnerForm } from "../../_components/PartnerForm";
 
 export const metadata: Metadata = { title: "Partenaires" };
@@ -73,13 +74,19 @@ export default async function PartnersAdminPage({ searchParams }: PageProps<"/ad
                             <span className="adm-sr">{row.published ? "Masquer" : "Afficher"} {row.name}</span>
                           </SubmitButton>
                         </form>
-                        <form action={deletePartner}>
-                          <input type="hidden" name="id" value={row.id} />
-                          <ConfirmSubmit>
-                            <Icon name="trash" size={16} />
+                        <ConfirmDialog
+                          action={deletePartner}
+                          fields={{ id: row.id }}
+                          title="Supprimer définitivement ?"
+                          description="Cette action est définitive et ne peut pas être annulée."
+                          confirmLabel="Supprimer"
+                          trigger={
+                            <>
+                              <Icon name="trash" size={16} />
                             <span className="adm-sr">Supprimer {row.name}</span>
-                          </ConfirmSubmit>
-                        </form>
+                            </>
+                          }
+                        />
                       </div>
                     </td>
                   </tr>

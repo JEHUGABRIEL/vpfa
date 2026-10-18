@@ -1,13 +1,13 @@
 import { desc } from "drizzle-orm";
 import type { Metadata } from "next";
 import Image from "next/image";
+import { ConfirmDialog } from "../../_components/ConfirmDialog";
 import { Icon } from "@/components/Icon";
 import { db } from "@/db";
 import { formations, media, posts } from "@/db/schema";
 import { builtInImages } from "@/lib/admin/images";
 import { requireAdmin } from "@/lib/auth/session";
 import { deleteMedia } from "../../_actions/media";
-import { ConfirmSubmit } from "../../_components/buttons";
 import { MediaUpload } from "../../_components/MediaUpload";
 
 export const metadata: Metadata = { title: "Médiathèque" };
@@ -68,13 +68,21 @@ export default async function MediaPage() {
                     {inUse ? (
                       <span className="adm-badge adm-badge-on">Utilisée sur le site</span>
                     ) : (
-                      <form action={deleteMedia}>
-                        <input type="hidden" name="id" value={upload.id} />
-                        <ConfirmSubmit>
-                          <Icon name="trash" size={16} />
-                          Supprimer
-                        </ConfirmSubmit>
-                      </form>
+                      <div className="adm-actions" style={{ justifyContent: "flex-start" }}>
+                        <ConfirmDialog
+                          action={deleteMedia}
+                          fields={{ id: upload.id }}
+                          title="Supprimer définitivement ?"
+                          description="Cette action est définitive et ne peut pas être annulée."
+                          confirmLabel="Supprimer"
+                          trigger={
+                            <>
+                              <Icon name="trash" size={16} />
+                            Supprimer
+                            </>
+                          }
+                        />
+                      </div>
                     )}
                   </figcaption>
                 </figure>
