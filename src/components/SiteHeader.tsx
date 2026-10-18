@@ -3,12 +3,59 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { navigation, site } from "@/lib/site";
 
+type NavListProps = { variant: "bar" | "drawer"; onNavigate?: () => void };
+
+function NavList({ variant, onNavigate, pathname }: NavListProps & { pathname: string | null }) {
+  const isActive = (href: string) =>
+    pathname === null ? false : href === "/" ? pathname === "/" : pathname.startsWith(href);
+
+  return (
+    <ul>
+      {navigation.map((item) => {
+        const active = isActive(item.href);
+        const link = (
+          <Link
+            href={item.href}
+            className={variant === "bar" && active ? "on" : undefined}
+            aria-current={active ? "page" : undefined}
+            onClick={onNavigate}
+          >
+            {item.label}
+          </Link>
+        );
+        return variant === "bar" ? (
+          <li key={item.href}>{link}</li>
+        ) : (
+          <li key={item.href} className={active ? "on" : undefined}>
+            <div className="mrow">{link}</div>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+function ActiveNavList(props: NavListProps) {
+  return <NavList {...props} pathname={usePathname()} />;
+}
+
+/**
+ * The current path is request data on dynamic routes, so it is read inside a
+ * Suspense boundary; the fallback renders the same links without highlighting.
+ */
+function Nav(props: NavListProps) {
+  return (
+    <Suspense fallback={<NavList {...props} pathname={null} />}>
+      <ActiveNavList {...props} />
+    </Suspense>
+  );
+}
+
 export function SiteHeader() {
-  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [stuck, setStuck] = useState(false);
 
@@ -33,9 +80,6 @@ export function SiteHeader() {
     };
   }, []);
 
-  const isActive = (href: string) =>
-    href === "/" ? pathname === "/" : pathname.startsWith(href);
-
   return (
     <header className="site-head">
       <div className="head-row">
@@ -53,7 +97,7 @@ export function SiteHeader() {
             <span />
           </button>
 
-          <Link href="/" className="brand" aria-label={`${site.name} — accueil`}>
+          <Link href="/" className="brand" aria-label={`${site.name} - accueil`}>
             <Image
               src="/images/logo.jpg"
               alt="Logo de l'ONG VPFA"
@@ -73,7 +117,7 @@ export function SiteHeader() {
               href={site.facebook}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Facebook — ONG VPFA"
+              aria-label="Facebook - ONG VPFA"
             >
               <Icon name="facebook" size={20} />
             </a>
@@ -81,7 +125,7 @@ export function SiteHeader() {
               href={`https://wa.me/${site.phoneHref.replace("+", "")}`}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="WhatsApp — ONG VPFA"
+              aria-label="WhatsApp - ONG VPFA"
             >
               <Icon name="whatsapp" size={20} />
             </a>
@@ -91,21 +135,9 @@ export function SiteHeader() {
 
       <nav className={`navbar${stuck ? " stuck" : ""}`} aria-label="Navigation principale">
         <div className="navbar-in">
-          <ul>
-            {navigation.map((item) => (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className={isActive(item.href) ? "on" : undefined}
-                  aria-current={isActive(item.href) ? "page" : undefined}
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <Nav variant="bar" />
           <Link href="/soutenir" className="nav-cta">
-            <Icon name="heart" size={17} />
+            <Icon name="heart" size={20} />
             <span>Nous soutenir</span>
           </Link>
         </div>
@@ -142,7 +174,7 @@ export function SiteHeader() {
             aria-label="Fermer le menu"
             onClick={() => setOpen(false)}
           >
-            <Icon name="close" size={24} />
+            <Icon name="close" size={20} />
           </button>
         </div>
 
@@ -151,39 +183,25 @@ export function SiteHeader() {
             href={site.facebook}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="Facebook — ONG VPFA"
+            aria-label="Facebook - ONG VPFA"
           >
-            <Icon name="facebook" size={21} />
+            <Icon name="facebook" size={20} />
           </a>
           <a
             href={`https://wa.me/${site.phoneHref.replace("+", "")}`}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="WhatsApp — ONG VPFA"
+            aria-label="WhatsApp - ONG VPFA"
           >
-            <Icon name="whatsapp" size={21} />
+            <Icon name="whatsapp" size={20} />
           </a>
           <a href={`mailto:${site.email}`} aria-label="Envoyer un e-mail à l'ONG VPFA">
-            <Icon name="mail" size={21} />
+            <Icon name="mail" size={20} />
           </a>
         </div>
 
         <div className="mmenu-list">
-          <ul>
-            {navigation.map((item) => (
-              <li key={item.href} className={isActive(item.href) ? "on" : undefined}>
-                <div className="mrow">
-                  <Link
-                    href={item.href}
-                    onClick={() => setOpen(false)}
-                    aria-current={isActive(item.href) ? "page" : undefined}
-                  >
-                    {item.label}
-                  </Link>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <Nav variant="drawer" onNavigate={() => setOpen(false)} />
           <div className="mmenu-foot">
             <Link href="/soutenir" className="btn btn-light" onClick={() => setOpen(false)}>
               Nous soutenir
@@ -191,11 +209,11 @@ export function SiteHeader() {
             </Link>
             <div className="mmenu-contact">
               <a href={`tel:${site.phoneHref}`}>
-                <Icon name="phone" size={15} />
+                <Icon name="phone" size={16} />
                 {site.phone}
               </a>
               <a href={`mailto:${site.email}`}>
-                <Icon name="mail" size={15} />
+                <Icon name="mail" size={16} />
                 {site.email}
               </a>
             </div>

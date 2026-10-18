@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { FormStatus, Honeypot } from "@/components/FormStatus";
 import { Icon } from "@/components/Icon";
-import { site } from "@/lib/site";
+import { type FormState, submitMessage } from "@/lib/public-actions";
+import { useActionForm } from "@/lib/use-action-form";
 
 const subjects = [
   "Demande d'information",
@@ -14,105 +15,68 @@ const subjects = [
   "Autre demande",
 ];
 
+const initialState: FormState = { status: "idle", message: "" };
+
 export function ContactForm() {
-  const [status, setStatus] = useState("");
-  const [waUrl, setWaUrl] = useState("");
-
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const name = String(data.get("name") ?? "").trim();
-    const email = String(data.get("email") ?? "").trim();
-    const phone = String(data.get("phone") ?? "").trim();
-    const subject = String(data.get("subject") ?? "").trim();
-    const message = String(data.get("message") ?? "").trim();
-
-    if (!name || !email || !message) {
-      setStatus("Merci de renseigner votre nom, votre e-mail et votre message.");
-      return;
-    }
-
-    const text = [
-      "Bonjour l'ONG VPFA,",
-      "",
-      `Objet : ${subject}`,
-      `Nom : ${name}`,
-      `E-mail : ${email}`,
-      phone ? `Téléphone : ${phone}` : "",
-      "",
-      message,
-    ]
-      .filter(Boolean)
-      .join("\n");
-
-    const url = `https://wa.me/${site.phoneHref.replace("+", "")}?text=${encodeURIComponent(text)}`;
-    setWaUrl(url);
-    setStatus("Votre message est prêt. WhatsApp va s'ouvrir pour l'envoyer à l'équipe.");
-    window.open(url, "_blank", "noopener,noreferrer");
-  }
+  const { state, onSubmit, pending } = useActionForm(submitMessage, initialState);
+  const done = state.status === "success";
 
   return (
-    <form className="form" onSubmit={handleSubmit}>
+    <form className="form" onSubmit={onSubmit}>
       <h3 className="form-title">
         Écrivez-nous <span className="lt">directement</span>
       </h3>
       <p className="note">
         Les champs marqués d&apos;un astérisque (*) sont obligatoires.
       </p>
-      <div className="row2">
+      <fieldset className="form-fields" disabled={pending || done}>
+        <div className="row2">
+          <label>
+            Nom complet *
+            <input name="name" type="text" placeholder="Votre nom" autoComplete="name" maxLength={120} required />
+          </label>
+          <label>
+            Adresse e-mail *
+            <input name="email" type="email" placeholder="vous@exemple.com" autoComplete="email" maxLength={200} required />
+          </label>
+        </div>
+        <div className="row2">
+          <label>
+            Téléphone
+            <input name="phone" type="tel" placeholder="+236 ..." autoComplete="tel" maxLength={40} />
+          </label>
+          <label>
+            Votre demande
+            <select name="subject" defaultValue={subjects[0]}>
+              {subjects.map((subject) => (
+                <option key={subject} value={subject}>
+                  {subject}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
         <label>
-          Nom complet *
-          <input name="name" type="text" placeholder="Votre nom" autoComplete="name" required />
+          Votre message *
+          <textarea
+            name="message"
+            rows={5}
+            placeholder="Décrivez votre demande en quelques lignes…"
+            maxLength={4000}
+            required
+          />
         </label>
-        <label>
-          Adresse e-mail *
-          <input name="email" type="email" placeholder="vous@exemple.com" autoComplete="email" required />
-        </label>
-      </div>
-      <div className="row2">
-        <label>
-          Téléphone
-          <input name="phone" type="tel" placeholder="+236 ..." autoComplete="tel" />
-        </label>
-        <label>
-          Votre demande
-          <select name="subject" defaultValue={subjects[0]}>
-            {subjects.map((subject) => (
-              <option key={subject} value={subject}>
-                {subject}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-      <label>
-        Votre message *
-        <textarea
-          name="message"
-          rows={5}
-          placeholder="Décrivez votre demande en quelques lignes…"
-          required
-        />
-      </label>
-      <button type="submit" className="btn btn-brand">
-        Envoyer le message
-        <Icon name="arrow-right" size={17} />
-      </button>
+        <Honeypot />
+        <button type="submit" className="btn btn-brand">
+          {pending ? "Envoi en cours…" : done ? "Message envoyé" : "Envoyer le message"}
+          <Icon name={done ? "check" : "arrow-right"} size={20} />
+        </button>
+      </fieldset>
       <p className="note form-privacy">
-        Vos informations servent uniquement à traiter votre demande et ne sont pas
-        enregistrées sur ce site.{" "}
+        Vos informations servent uniquement à traiter votre demande.{" "}
         <Link href="/mentions-legales#confidentialite">En savoir plus</Link>
       </p>
-      {status ? (
-        <p className="ok" role="status" aria-live="polite">
-          {status}{" "}
-          {waUrl ? (
-            <a href={waUrl} target="_blank" rel="noopener noreferrer">
-              Ouvrir WhatsApp
-            </a>
-          ) : null}
-        </p>
-      ) : null}
+      <FormStatus state={state} />
     </form>
   );
 }

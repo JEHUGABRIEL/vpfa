@@ -31,7 +31,7 @@ export function CtaBand({
         <div className="cta-actions">
           <Link href={primaryHref} className="btn btn-light">
             {primaryLabel}
-            <Icon name="arrow-right" size={17} />
+            <Icon name="arrow-right" size={20} />
           </Link>
           <Link href={secondaryHref} className="btn btn-ghost">
             {secondaryLabel}

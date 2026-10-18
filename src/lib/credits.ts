@@ -39,7 +39,7 @@ export const photoCredits = [
     slug: "artisanat",
     file: "/images/artisanat.webp",
     alt: "Femme confectionnant des accessoires artisanaux",
-    title: "Woman sewing purses at craft cooperative — Zanzibar",
+    title: "Woman sewing purses at craft cooperative - Zanzibar",
     artist: "Christopher Haslett",
     license: "CC BY-SA 4.0",
     source:
@@ -68,7 +68,7 @@ export const photoCredits = [
     file: "/images/protection.webp",
     alt: "Espace adapté aux enfants en République centrafricaine",
     title: "A child-friendly space in the Central African Republic",
-    artist: "DFID — UK Department for International Development",
+    artist: "DFID - UK Department for International Development",
     license: "CC BY 2.0",
     source:
       "https://commons.wikimedia.org/wiki/File:A_child-friendly_space_in_the_Central_African_Republic_(11237052854).jpg",

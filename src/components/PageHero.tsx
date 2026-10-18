@@ -25,7 +25,6 @@ export function PageHero({
 }: PageHeroProps) {
   return (
     <section className="hero page-hero">
-      <div className="hero-dots" aria-hidden="true" />
       <div className="hero-left">
         <div className="hero-card">
           <nav className="kicker light crumbs" aria-label="Fil d'Ariane">

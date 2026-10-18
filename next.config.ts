@@ -17,6 +17,16 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  images: {
+    localPatterns: [
+      { pathname: "/images/**", search: "" },
+      { pathname: "/media/**", search: "" },
+    ],
+  },
+  experimental: {
+    // Image uploads from the back office (files are capped at 3 MB in the action).
+    serverActions: { bodySizeLimit: "4mb" },
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

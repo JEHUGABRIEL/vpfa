@@ -1,7 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Poppins } from "next/font/google";
-import { SiteFooter } from "@/components/SiteFooter";
-import { SiteHeader } from "@/components/SiteHeader";
+import { Fraunces, Poppins } from "next/font/google";
 import { site } from "@/lib/site";
 import "./globals.css";
 
@@ -12,10 +10,16 @@ const poppins = Poppins({
   display: "swap",
 });
 
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-fraunces",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
-    default: `${site.name} — ${site.fullName}`,
+    default: `${site.name} - ${site.fullName}`,
     template: `%s | ${site.name}`,
   },
   description: site.description,
@@ -38,12 +42,12 @@ export const metadata: Metadata = {
     locale: "fr_FR",
     url: site.url,
     siteName: site.name,
-    title: `${site.name} — ${site.fullName}`,
+    title: `${site.name} - ${site.fullName}`,
     description: site.description,
   },
   twitter: {
     card: "summary_large_image",
-    title: `${site.name} — ${site.fullName}`,
+    title: `${site.name} - ${site.fullName}`,
     description: site.description,
   },
   robots: {
@@ -60,45 +64,14 @@ export const viewport: Viewport = {
   colorScheme: "light",
 };
 
-const organizationJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "NGO",
-  name: site.name,
-  alternateName: [site.fullName, site.englishName, site.acronym],
-  url: site.url,
-  logo: `${site.url}/images/logo.jpg`,
-  description: site.description,
-  foundingDate: site.founded,
-  email: site.email,
-  telephone: site.phone,
-  address: {
-    "@type": "PostalAddress",
-    addressLocality: "Bangui",
-    addressCountry: "CF",
-  },
-  sameAs: [site.facebook],
-  areaServed: "République centrafricaine",
-};
-
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr" className={poppins.variable}>
-      <body id="top">
-        <a className="skip-link" href="#contenu">
-          Aller au contenu
-        </a>
-        <SiteHeader />
-        <main id="contenu">{children}</main>
-        <SiteFooter />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
-        />
-      </body>
+    <html lang="fr" className={`${poppins.variable} ${fraunces.variable}`}>
+      <body id="top">{children}</body>
     </html>
   );
 }

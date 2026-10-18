@@ -1,142 +1,123 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { FormStatus, Honeypot } from "@/components/FormStatus";
 import { Icon } from "@/components/Icon";
-import { formations, site } from "@/lib/site";
+import { type FormState, submitRegistration } from "@/lib/public-actions";
+import { NEXT_SESSIONS } from "@/lib/registration";
+import { useActionForm } from "@/lib/use-action-form";
 
-export function RegistrationForm() {
-  const [status, setStatus] = useState("");
-  const [waUrl, setWaUrl] = useState("");
-  const phone = site.phoneHref.replace("+", "");
+export type FormationOption = { slug: string; label: string };
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const data = new FormData(form);
-    const name = String(data.get("name") ?? "").trim();
-    const telephone = String(data.get("phone") ?? "").trim();
-    const email = String(data.get("email") ?? "").trim();
-    const formation = String(data.get("formation") ?? "").trim();
-    const message = String(data.get("message") ?? "").trim();
-
-    if (!name || !telephone || !formation) {
-      setStatus(
-        "Merci de renseigner votre nom, votre téléphone et la formation choisie.",
-      );
-      return;
-    }
-
-    const text = [
-      "Bonjour l'ONG VPFA,",
-      "",
-      "Je souhaite m'inscrire à une formation.",
-      `Nom : ${name}`,
-      `Téléphone : ${telephone}`,
-      email ? `E-mail : ${email}` : "",
-      `Formation : ${formation}`,
-      message ? `Message : ${message}` : "",
-      "",
-      "Merci de me communiquer les prochaines modalités d'inscription.",
-    ]
-      .filter(Boolean)
-      .join("\n");
-
-    const url = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
-    setWaUrl(url);
-    setStatus(
-      "Votre demande est prête. WhatsApp va s'ouvrir pour l'envoyer à l'équipe VPFA.",
-    );
-    window.open(url, "_blank", "noopener,noreferrer");
-  }
+const initialState: FormState = { status: "idle", message: "" };
+export function RegistrationForm({
+  formations,
+  orangeMoney,
+}: {
+  formations: FormationOption[];
+  orangeMoney: string;
+}) {
+  const { state, onSubmit, pending } = useActionForm(submitRegistration, initialState);
+  const done = state.status === "success";
 
   return (
-    <form className="form" onSubmit={handleSubmit}>
+    <form className="form" onSubmit={onSubmit}>
       <h3 className="form-title">
         Demander une <span className="lt">inscription</span>
       </h3>
       <p className="note">
         Les champs marqués d&apos;un astérisque (*) sont obligatoires.
       </p>
-      <div className="row2">
-        <label>
-          Nom complet *
-          <input
-            name="name"
-            type="text"
-            placeholder="Votre nom et prénom"
-            autoComplete="name"
-            required
-          />
-        </label>
-        <label>
-          Téléphone *
-          <input
-            name="phone"
-            type="tel"
-            placeholder="+236 ..."
-            autoComplete="tel"
-            required
-          />
-        </label>
-      </div>
-      <div className="row2">
-        <label>
-          E-mail (facultatif)
-          <input
-            name="email"
-            type="email"
-            placeholder="vous@exemple.com"
-            autoComplete="email"
-          />
-        </label>
-        <label>
-          Formation choisie *
-          <select name="formation" required defaultValue="">
-            <option value="" disabled>
-              Sélectionner une formation
-            </option>
-            {formations.map((formation) => (
-              <option
-                value={`${formation.title} — ${formation.price}`}
-                key={formation.slug}
-              >
-                {formation.title} · {formation.price}
+      <fieldset className="form-fields" disabled={pending || done}>
+        <div className="row2">
+          <label>
+            Nom complet *
+            <input
+              name="name"
+              type="text"
+              placeholder="Votre nom et prénom"
+              autoComplete="name"
+              maxLength={120}
+              required
+            />
+          </label>
+          <label>
+            Téléphone *
+            <input
+              name="phone"
+              type="tel"
+              placeholder="+236 ..."
+              autoComplete="tel"
+              maxLength={40}
+              required
+            />
+          </label>
+        </div>
+        <div className="row2">
+          <label>
+            E-mail (facultatif)
+            <input
+              name="email"
+              type="email"
+              placeholder="vous@exemple.com"
+              autoComplete="email"
+              maxLength={200}
+            />
+          </label>
+          <label>
+            Formation choisie *
+            <select name="formation" required defaultValue="">
+              <option value="" disabled>
+                Sélectionner une formation
               </option>
-            ))}
-            <option value="Je souhaite être informé·e des prochaines sessions">
-              Je souhaite être informé·e des prochaines sessions
-            </option>
-          </select>
+              {formations.map((formation) => (
+                <option value={formation.slug} key={formation.slug}>
+                  {formation.label}
+                </option>
+              ))}
+              <option value={NEXT_SESSIONS}>
+                Je souhaite être informé·e des prochaines sessions
+              </option>
+            </select>
+          </label>
+        </div>
+        <fieldset className="pay-choice">
+          <legend>Mode de paiement *</legend>
+          <label>
+            <input type="radio" name="paymentMethod" value="orange_money" defaultChecked />
+            <span>
+              <strong>Orange Money</strong>
+              <small>Transfert au {orangeMoney}, avec votre numéro de dossier en motif.</small>
+            </span>
+          </label>
+          <label>
+            <input type="radio" name="paymentMethod" value="especes" />
+            <span>
+              <strong>Espèces au bureau</strong>
+              <small>Sur rendez-vous à Bangui, avec votre numéro de dossier.</small>
+            </span>
+          </label>
+        </fieldset>
+        <label>
+          Votre message (facultatif)
+          <textarea
+            name="message"
+            rows={4}
+            placeholder="Votre disponibilité, une question…"
+            maxLength={2000}
+          />
         </label>
-      </div>
-      <label>
-        Votre message (facultatif)
-        <textarea
-          name="message"
-          rows={4}
-          placeholder="Votre disponibilité, une question…"
-        />
-      </label>
-      <button type="submit" className="btn btn-brand">
-        Préparer ma demande
-        <Icon name="whatsapp" size={17} />
-      </button>
+        <Honeypot />
+        <button type="submit" className="btn btn-brand">
+          {pending ? "Envoi en cours…" : done ? "Demande envoyée" : "Envoyer et recevoir mon numéro de dossier"}
+          <Icon name={done ? "check" : "arrow-right"} size={20} />
+        </button>
+      </fieldset>
       <p className="note form-privacy">
-        Vos informations servent uniquement à traiter votre demande et ne sont pas
-        enregistrées sur ce site.{" "}
+        Vos informations servent uniquement à traiter votre demande.{" "}
         <Link href="/mentions-legales#confidentialite">En savoir plus</Link>
       </p>
-      {status ? (
-        <p className="ok" role="status" aria-live="polite">
-          {status}{" "}
-          {waUrl ? (
-            <a href={waUrl} target="_blank" rel="noopener noreferrer">
-              Ouvrir WhatsApp
-            </a>
-          ) : null}
-        </p>
-      ) : null}
+      <FormStatus state={state} />
     </form>
   );
 }

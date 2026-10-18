@@ -1,33 +1,24 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { Icon } from "@/components/Icon";
+import { NotFoundContent } from "@/components/NotFoundContent";
+import { SiteFooter } from "@/components/SiteFooter";
+import { SiteHeader } from "@/components/SiteHeader";
 
 export const metadata: Metadata = {
   title: "Page introuvable",
   robots: { index: false },
 };
 
+// Unknown URLs render here, under the root layout only: the (site) header and
+// footer are not present, so this page adds them. notFound() calls from site
+// pages use (site)/not-found.tsx instead, which must not add them again.
 export default function NotFound() {
   return (
-    <section className="not-found">
-      <div className="container not-found-inner">
-        <p className="not-found-code">404</p>
-        <h1>Cette page n&apos;existe pas.</h1>
-        <p>
-          Le lien est peut-être ancien, ou la page a été déplacée. Retrouvez
-          l&apos;essentiel depuis l&apos;accueil ou contactez-nous.
-        </p>
-        <div className="not-found-actions">
-          <Link href="/" className="btn btn-brand">
-            Retour à l&apos;accueil
-            <Icon name="arrow-right" size={16} />
-          </Link>
-          <Link href="/#contact" className="btn btn-outline">
-            Nous contacter
-            <Icon name="mail" size={16} />
-          </Link>
-        </div>
-      </div>
-    </section>
+    <>
+      <SiteHeader />
+      <main id="contenu">
+        <NotFoundContent />
+      </main>
+      <SiteFooter />
+    </>
   );
 }

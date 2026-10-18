@@ -90,20 +90,20 @@ export function SiteFooter() {
                 href={site.facebook}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Facebook — ONG VPFA"
+                aria-label="Facebook - ONG VPFA"
               >
-                <Icon name="facebook" size={18} />
+                <Icon name="facebook" size={20} />
               </a>
               <a
                 href={`https://wa.me/${site.phoneHref.replace("+", "")}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="WhatsApp — ONG VPFA"
+                aria-label="WhatsApp - ONG VPFA"
               >
-                <Icon name="whatsapp" size={18} />
+                <Icon name="whatsapp" size={20} />
               </a>
               <a href={`mailto:${site.email}`} aria-label="Envoyer un e-mail à l'ONG VPFA">
-                <Icon name="mail" size={18} />
+                <Icon name="mail" size={20} />
               </a>
             </div>
           </div>
@@ -112,15 +112,16 @@ export function SiteFooter() {
         <div className="foot-bottom">
           <div className="wrap foot-bottom-in">
             <span>
-              © {site.founded} {site.name} — {site.fullName}. Tous droits réservés.
+              © {site.founded} {site.name} - {site.fullName}. Tous droits réservés.
             </span>
             <span className="foot-links">
               <Link href="/mentions-legales">Mentions légales</Link>
               <Link href="/mentions-legales#confidentialite">Confidentialité</Link>
+              <Link href="/conditions">Conditions d&apos;utilisation</Link>
               <Link href="/credits">Crédits photo</Link>
               <a href="#top" className="to-top">
                 Retour en haut de page
-                <Icon name="arrow-up-right" size={14} />
+                <Icon name="arrow-up-right" size={16} />
               </a>
             </span>
           </div>
@@ -133,7 +134,7 @@ export function SiteFooter() {
         target="_blank"
         rel="noopener noreferrer"
       >
-        <Icon name="whatsapp" size={22} />
+        <Icon name="whatsapp" size={20} />
         <span className="fab-txt">Nous contacter</span>
       </a>
     </>

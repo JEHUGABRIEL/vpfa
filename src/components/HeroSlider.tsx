@@ -65,8 +65,6 @@ export function HeroSlider() {
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
     >
-      <div className="hero-dots" aria-hidden="true" />
-
       {slides.map((slide, slideIndex) => {
         const active = slideIndex === index;
         return (
@@ -88,7 +86,7 @@ export function HeroSlider() {
                 <p className="hero-txt">{slide.text}</p>
                 <Link href={slide.href} className="btn btn-sky" tabIndex={active ? 0 : -1}>
                   {slide.cta}
-                  <Icon name="arrow-right" size={17} />
+                  <Icon name="arrow-right" size={20} />
                 </Link>
               </div>
             </div>
@@ -114,7 +112,7 @@ export function HeroSlider() {
           aria-label={stopped ? "Reprendre le défilement" : "Mettre en pause le défilement"}
           onClick={() => setStopped((value) => !value)}
         >
-          <Icon name={stopped ? "play" : "pause"} size={12} />
+          <Icon name={stopped ? "play" : "pause"} size={16} />
         </button>
         {slides.map((slide, slideIndex) => (
           <button

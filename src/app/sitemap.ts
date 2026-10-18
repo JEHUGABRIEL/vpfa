@@ -1,7 +1,9 @@
 import type { MetadataRoute } from "next";
-import { posts, site } from "@/lib/site";
+import { getPosts } from "@/lib/content";
+import { site } from "@/lib/site";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const posts = await getPosts();
   const staticRoutes = [
     { path: "", priority: 1 },
     { path: "/a-propos", priority: 0.8 },
@@ -11,6 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/soutenir", priority: 0.8 },
     { path: "/credits", priority: 0.3 },
     { path: "/mentions-legales", priority: 0.2 },
+    { path: "/conditions", priority: 0.2 },
   ];
 
   return [
@@ -22,7 +25,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
     ...posts.map((post) => ({
       url: `${site.url}/actualites/${post.slug}`,
-      lastModified: post.isoDate,
+      lastModified: post.updatedAt.toISOString(),
       changeFrequency: "yearly" as const,
       priority: 0.6,
     })),
