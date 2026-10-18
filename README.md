@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Site officiel de l'ONG VPFA
 
-## Getting Started
+Site vitrine professionnel de l'ONG **VPFA — Vision Positive pour les Femmes en Afrique** (PVWA), basée à Bangui, en République centrafricaine.
 
-First, run the development server:
+Le site présente l'organisation, ses actions, ses deux formations professionnelles (saponification et perlage), ses partenaires, ses actualités et ses moyens de contact. La structure et le langage visuel s'inspirent du site de référence indiqué par le client, adaptés à la palette verte de l'ONG.
+
+## Stack
+
+- **Next.js 16** (App Router, Turbopack, Cache Components)
+- **React 19**
+- **Tailwind CSS 4** (utilitaires + design system CSS personnalisé)
+- **TypeScript**
+- **next/font** avec la police Poppins auto-hébergée
+- **next/image** pour l'optimisation des images
+
+Aucun service externe n'est requis : les formulaires préparent un message WhatsApp (ou un e-mail) que l'utilisateur envoie lui-même.
+
+## Démarrage
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Le site est disponible sur <http://localhost:3000>.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build   # build de production
+npm start       # serveur de production
+npm run lint    # ESLint
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Structure
 
-## Learn More
+```
+src/app/               pages (App Router)
+  page.tsx             accueil
+  a-propos/            présentation, valeurs, gouvernance
+  nos-actions/         programmes et bénéficiaires
+  formations/          programmes, tarifs, inscription
+  partenaires/         partenaires et réseau
+  actualites/          journal + pages d'article dynamiques
+  contact/             coordonnées, formulaire, carte, FAQ
+  soutenir/            don, mécénat, bénévolat
+  credits/             crédits photo et licences
+src/components/        header, footer, hero, formulaires, UI
+src/lib/site.ts        coordonnées et contenu éditorial
+src/lib/credits.ts     crédits des photos d'illustration
+public/images/         logo et visuels optimisés (WebP)
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Personnaliser le contenu
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Coordonnées, liens et textes** : `src/lib/site.ts`
+- **Logo** : `public/images/logo.jpg` (également utilisé pour l'icône du site)
+- **Photos** : `public/images/*.webp` — pensez à mettre à jour `src/lib/credits.ts` et la page `/credits` si vous remplacez une image
+- **URL publique** (SEO, sitemap) : variable d'environnement `NEXT_PUBLIC_SITE_URL`
+- **Réseaux sociaux** : lien Facebook dans `src/lib/site.ts`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Crédits
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Les photographies d'illustration proviennent de Wikimedia Commons et sont utilisées sous licence Creative Commons (CC BY 2.0 et CC BY-SA 4.0). Le détail des attributions est disponible sur la page `/credits`. Ces images ne représentent pas nécessairement des activités conduites par l'ONG VPFA.
