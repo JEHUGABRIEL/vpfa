@@ -19,7 +19,7 @@ export const site = {
   president: "Élodie Francine Moussa",
   presidentRole:
     "Présidente du Conseil d'administration, conseillère municipale de Bangui",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://ong-vpfa.vercel.app",
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://vpfa.vercel.app",
   hosting: {
     name: "Vercel Inc.",
     address: "440 N Barranca Ave #4133, Covina, CA 91723, États-Unis",
